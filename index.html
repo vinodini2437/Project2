@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhisperWall — Anonymous Campus Confessions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Serif:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="stamp">confidential</span>
+    <h1>Whisper<span class="accent">Wall</span></h1>
+  </div>
+
+  <div class="college-select">
+    <label for="collegePicker">college:</label>
+    <select id="collegePicker"></select>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="feed">Feed</button>
+    <button class="tab" data-view="trending">Trending</button>
+    <button class="tab" data-view="communities">Communities</button>
+    <button class="tab" data-view="polls">Polls</button>
+  </nav>
+
+  <button class="btn-new" id="openComposer">+ New Confession</button>
+</header>
+
+<div class="layout">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="panel">
+      <h3>categories</h3>
+      <div class="pill-group" id="categoryList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>tags</h3>
+      <div class="tag-group" id="tagList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>my communities</h3>
+      <div class="community-list" id="communityList"></div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN FEED ===================== -->
+  <main class="feed-area">
+
+    <div class="feed-toolbar">
+      <div class="sort-group">
+        <button class="sort-btn active" data-sort="newest">Newest</button>
+        <button class="sort-btn" data-sort="top">Most reacted</button>
+      </div>
+      <input type="text" id="searchBox" placeholder="search confessions…" />
+    </div>
+
+    <div id="feedStatus" class="feed-status hidden"></div>
+    <div id="feedList" class="feed-list"></div>
+
+    <!-- ===== Communities view ===== -->
+    <div id="communitiesView" class="view hidden">
+      <h2 class="view-title">Communities</h2>
+      <div class="communities-grid" id="communitiesGrid"></div>
+      <form id="newCollegeForm" class="new-college-form">
+        <input type="text" id="newCollegeInput" placeholder="Add your college…" />
+        <button type="submit">Create community</button>
+      </form>
+    </div>
+
+    <!-- ===== Polls view ===== -->
+    <div id="pollsView" class="view hidden">
+      <div class="polls-header">
+        <h2 class="view-title">Polls</h2>
+        <button class="btn-new-outline" id="openPollComposer">+ New Poll</button>
+      </div>
+      <div id="pollsList" class="polls-list"></div>
+    </div>
+
+  </main>
+
+  <!-- ===================== RIGHT RAIL ===================== -->
+  <aside class="rightrail">
+    <div class="panel">
+      <h3>trending now</h3>
+      <ol class="trending-list" id="trendingList"></ol>
+    </div>
+
+    <div class="panel live-poll" id="livePollPanel">
+      <h3>live poll</h3>
+      <div id="livePollContent"></div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ===================== COMPOSER MODAL ===================== -->
+<div class="modal-overlay hidden" id="composerOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>New Confession</h2>
+      <button class="modal-close" id="closeComposer">✕</button>
+    </div>
+    <form id="confessionForm">
+      <label>College</label>
+      <select id="composerCollege" required></select>
+
+      <label>Category</label>
+      <select id="composerCategory">
+        <option>Academics</option>
+        <option>Relationships</option>
+        <option>Roommates</option>
+        <option selected>Campus Life</option>
+        <option>Rant</option>
+        <option>Wholesome</option>
+      </select>
+
+      <label>Your confession</label>
+      <textarea id="composerContent" rows="5" maxlength="600" placeholder="Type anonymously… no names, no accounts, no judgment." required></textarea>
+      <div class="char-count"><span id="charCount">0</span>/600</div>
+
+      <label>Tags <span class="hint">(space or comma separated, optional)</span></label>
+      <input type="text" id="composerTags" placeholder="#finals #allnighter" />
+
+      <button type="submit" class="btn-submit">Post anonymously</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== POLL COMPOSER MODAL ===================== -->
+<div class="modal-overlay hidden" id="pollComposerOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>New Poll</h2>
+      <button class="modal-close" id="closePollComposer">✕</button>
+    </div>
+    <form id="pollForm">
+      <label>College</label>
+      <select id="pollCollege" required></select>
+
+      <label>Question</label>
+      <input type="text" id="pollQuestion" placeholder="Ask something campus-wide…" required />
+
+      <label>Options <span class="hint">(min 2)</span></label>
+      <div id="pollOptionsWrap">
+        <input type="text" class="poll-option-input" placeholder="Option 1" />
+        <input type="text" class="poll-option-input" placeholder="Option 2" />
+      </div>
+      <button type="button" id="addPollOption" class="btn-add-option">+ Add option</button>
+
+      <button type="submit" class="btn-submit">Create poll</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== CONFESSION DETAIL MODAL ===================== -->
+<div class="modal-overlay hidden" id="detailOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2>Confession</h2>
+      <button class="modal-close" id="closeDetail">✕</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
